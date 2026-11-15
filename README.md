@@ -1,65 +1,68 @@
 # High-Scale Collaborative Workspace
 
-A production-minded frontend engineering project built incrementally to explore
-the architecture and performance challenges of large, collaborative web applications.
+A React + TypeScript issue workspace used to explore the engineering trade-offs behind collaborative, data-intensive frontend applications.
 
-The project starts as a simple React application and evolves version by version,
-with each iteration introducing a real engineering requirement rather than
-adding complexity for its own sake.
+The repository preserves the original V0 issue-list foundation and adds a more complete workspace interface. The current implementation is intentionally a **browser-local prototype**: it persists issues in local storage and synchronizes open tabs on the same origin. It does not yet provide server-backed multi-user collaboration.
 
-## V0 — Baseline React Application
+## Current capabilities
 
-The first version establishes a clean React + TypeScript foundation.
+- Issue overview with status counts, search, status filters, and priority filters.
+- Issue creation, editing, deletion, and status/priority updates.
+- Browser persistence using local storage.
+- Cross-tab updates using the BroadcastChannel API, with the storage event as a fallback.
+- Search state reflected in the URL so a filtered view can be bookmarked.
+- Responsive issue table and detail panel.
+- Keyboard-accessible controls and reduced-motion support.
+- Online/offline connection indicator.
 
-### Features
+## Technology
 
-- Issue list
-- Issue details
-- Create issue
-- Edit issue
-- Delete issue
-- Search issues
-- Filter by status and priority
-- Local mock data
-
-### Tech Stack
-
-- React
+- React 19
 - TypeScript
 - Vite
+- Browser Storage and BroadcastChannel APIs
 
-### Architecture
+## Run locally
 
-V0 intentionally uses local React state and mock data.
+```bash
+npm install
+npm run dev
+```
 
-No external state-management or data-fetching library is used yet.
+Run the static checks:
 
-This provides a simple baseline for evaluating the architectural changes
-introduced in later versions.
+```bash
+npm run lint
+npm run build
+```
+
+## Architecture notes
+
+The current client keeps the issue collection in React state and persists each accepted local change to `localStorage`. A `BroadcastChannel` message informs other tabs opened on the same origin; the browser `storage` event provides a fallback path. This is useful for exploring client synchronization and stale-view behavior, but it is not a substitute for an authoritative server.
+
+The UI is kept dependency-light at this stage. The existing issue model is extended with optional priority, assignee, labels, and an update timestamp while retaining the original required fields.
 
 ## Roadmap
 
-- [x] V0 — Baseline React application
-- [ ] V1 — API and server state
-- [ ] V2 — Large dataset and rendering performance
-- [ ] V3 — URL-driven state
-- [ ] V4 — Optimistic mutations
-- [ ] V5 — Real-time updates
-- [ ] V6 — Reconnection
-- [ ] V7 — Versioned changes
-- [ ] V8 — Delta synchronization
-- [ ] V9 — Failure and consistency scenarios
-- [ ] V10 — Conflict handling
-- [ ] V11 — Offline support
-- [ ] V12 — Production hardening
+- [x] V0 — React + TypeScript issue workspace
+- [x] Workspace UI — issue lifecycle, filters, details, and responsive layout
+- [x] Browser persistence and same-origin tab synchronization
+- [ ] V1 — Authoritative API and server-state cache
+- [ ] V2 — Large server-side dataset, pagination, and list virtualization
+- [ ] V3 — URL-driven filters, sorting, and selection
+- [ ] V4 — Optimistic mutations with rollback and conflict-aware reconciliation
+- [ ] V5 — Server-backed real-time collaboration across clients
+- [ ] V6 — Reconnection, replay, and idempotent event processing
+- [ ] V7 — Versioned records and delta synchronization
+- [ ] V8 — Conflict resolution and offline mutation queue
+- [ ] V9 — Automated unit, integration, and browser-level tests
+- [ ] V10 — Production deployment, observability, and operational hardening
 
-## Engineering Goal
+## Current limitations
 
-The goal is not to build a clone of Jira or Linear.
+- Data is local to the browser profile; there is no shared database or authentication.
+- BroadcastChannel synchronization is limited to tabs on the same origin and does not coordinate different devices.
+- Offline changes are retained locally, but there is no durable mutation queue or server reconciliation yet.
+- The sample data is illustrative and is not a performance benchmark.
 
-The goal is to progressively investigate the frontend engineering problems
-that emerge as a workspace becomes larger, more interactive, and more
-collaborative.
-
-Each version introduces a requirement that creates a genuine architectural
-problem, and the implementation evolves in response.
+The next architectural step is to introduce an authoritative API before adding server-backed real-time collaboration. That keeps the synchronization model grounded in a clear source of truth instead of simulating distributed consistency entirely in the browser.
